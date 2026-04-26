@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel – Raju Transport</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>" />
+</head>
+<body>
+
+<!-- Admin Login Screen -->
+<div id="adminLoginScreen">
+  <div class="admin-login-wrap">
+    <div class="admin-login-card">
+      <div class="admin-login-logo">
+        <div style="font-size:48px;margin-bottom:12px">🔐</div>
+        <h2>Admin Panel</h2>
+        <p>Raju Transport Management</p>
+      </div>
+      <div id="adminLoginAlert"></div>
+      <form id="adminLoginForm">
+        <div class="form-group">
+          <label>Admin ID <span class="req">*</span></label>
+          <input type="text" class="form-control" id="adminId" placeholder="Enter admin ID" autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label>Password <span class="req">*</span></label>
+          <input type="password" class="form-control" id="adminPassword" placeholder="Enter password" autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="adminLoginBtn">Login to Dashboard</button>
+        <p style="text-align:center;margin-top:14px;font-size:13px">
+          <a href="#" id="forgotPasswordLink" style="color:var(--primary)">Forgot Password?</a>
+        </p>
+      </form>
+      <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--text-light)">
+        <a href="/" style="color:var(--primary)">← Back to Website</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Dashboard -->
+<div id="adminDashboard" class="hidden">
+  <div class="admin-sidebar">
+    <div class="sidebar-logo">
+      <div style="font-size:28px">🚛</div>
+      <div>
+        <strong>Raju Transport</strong>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link active" data-view="submissions">
+        <span>📋</span> Submissions
+      </a>
+      <a href="#" class="sidebar-link" data-view="stats">
+        <span>📊</span> Statistics
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn btn-outline" id="adminLogoutBtn" style="width:100%;font-size:13px;padding:8px">
+        🚪 Logout
+      </button>
+    </div>
+  </div>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <div>
+        <h1 id="viewTitle">Submissions</h1>
+        <p id="viewSubtitle" style="font-size:13px;color:var(--text-light)">All booking requests</p>
+      </div>
+      <div class="topbar-actions">
+        <a href="/api/admin/export" id="exportBtn" class="btn btn-outline" style="font-size:13px;padding:8px 16px">
+          ⬇️ Export CSV
+        </a>
+      </div>
+    </div>
+
+    <!-- Submissions View -->
+    <div id="view-submissions">
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search by name, phone, email, goods..." class="search-input" />
+        </div>
+        <select id="loadTypeFilter" class="filter-select">
+          <option value="">All Load Types</option>
+          <option value="Full Truck Load (FTL)">Full Truck Load (FTL)</option>
+          <option value="Half Truck Load">Half Truck Load</option>
+          <option value="Any Quantity">Any Quantity</option>
+        </select>
+        <button class="btn btn-primary" id="applyFilter" style="padding:9px 18px;font-size:13px">Apply</button>
+        <button class="btn btn-outline" id="clearFilter" style="padding:9px 18px;font-size:13px">Clear</button>
+      </div>
+
+      <div id="submissionsLoading" class="loading-state">
+        <div class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:var(--primary);width:32px;height:32px"></div>
+        <p>Loading submissions...</p>
+      </div>
+
+      <div id="submissionsEmpty" class="empty-state hidden">
+        <div style="font-size:48px;margin-bottom:12px">📭</div>
+        <h3>No submissions yet</h3>
+        <p>Booking requests will appear here once users submit the form.</p>
+      </div>
+
+      <div id="submissionsTable" class="hidden">
+        <div class="table-meta">
+          <span id="totalCount"></span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Full Name</th>
+                <th>Mobile</th>
+                <th>Email</th>
+                <th>Type of Goods</th>
+                <th>Load Type</th>
+                <th>Submitted At</th>
+              </tr>
+            </thead>
+            <tbody id="submissionsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats View -->
+    <div id="view-stats" class="hidden">
+      <div class="stats-grid" id="statsGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="modal-overlay hidden" id="forgotModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h2>Reset Password 🔐</h2>
+      <button class="modal-close" id="closeForgotModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="forgotAlert"></div>
+      <div id="forgotForm">
+        <p style="font-size:14px;color:var(--text-light);margin-bottom:20px">
+          A password reset link will be sent to<br>
+          <strong style="color:var(--primary)">rajutransport27@gmail.com</strong>
+        </p>
+        <button class="btn btn-primary btn-full" id="sendResetBtn">Send Reset Link</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/admin.js"></script>
+</body>
+</html>

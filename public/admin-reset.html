@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reset Admin Password – Raju Transport</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body>
+<div class="admin-login-wrap">
+  <div class="admin-login-card">
+    <div class="admin-login-logo">
+      <div style="font-size:48px;margin-bottom:12px">🔐</div>
+      <h2>Set New Password</h2>
+      <p>Raju Transport Admin</p>
+    </div>
+
+    <div id="resetAlert"></div>
+
+    <div id="resetForm">
+      <div class="form-group">
+        <label>New Password <span class="req">*</span></label>
+        <input type="password" class="form-control" id="newPassword" placeholder="Enter new password (min 6 chars)" />
+      </div>
+      <div class="form-group">
+        <label>Confirm Password <span class="req">*</span></label>
+        <input type="password" class="form-control" id="confirmPassword" placeholder="Re-enter new password" />
+      </div>
+      <button class="btn btn-primary btn-full" id="resetBtn">Update Password</button>
+    </div>
+
+    <div id="resetSuccess" style="display:none;text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">✅</div>
+      <h3 style="margin-bottom:8px">Password Updated!</h3>
+      <p style="color:var(--text-light);font-size:14px;margin-bottom:20px">Your admin password has been changed successfully.</p>
+      <a href="/admin" class="btn btn-primary btn-full">Go to Admin Login</a>
+    </div>
+
+    <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--text-light)">
+      <a href="/admin" style="color:var(--primary)">← Back to Login</a>
+    </p>
+  </div>
+</div>
+
+<script>
+  function showAlert(msg, type = 'error') {
+    const icons = { error: '❌', success: '✅', info: 'ℹ️' };
+    document.getElementById('resetAlert').innerHTML =
+      `<div class="alert alert-${type}">${icons[type]} ${msg}</div>`;
+  }
+
+  function setLoading(btn, loading) {
+    if (loading) {
+      btn.dataset.orig = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner"></span> Updating...';
+      btn.disabled = true;
+    } else {
+      btn.innerHTML = btn.dataset.orig;
+      btn.disabled = false;
+    }
+  }
+
+  // Get token from URL
+  const token = new URLSearchParams(window.location.search).get('token');
+  if (!token) {
+    document.getElementById('resetForm').style.display = 'none';
+    showAlert('Invalid or missing reset link. Please request a new one.', 'error');
+  }
+
+  document.getElementById('resetBtn')?.addEventListener('click', async () => {
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (!newPassword || newPassword.length < 6) {
+      showAlert('Password must be at least 6 characters.'); return;
+    }
+    if (newPassword !== confirmPassword) {
+      showAlert('Passwords do not match.'); return;
+    }
+
+    const btn = document.getElementById('resetBtn');
+    setLoading(btn, true);
+
+    try {
+      const res = await fetch('/api/admin/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, newPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      document.getElementById('resetForm').style.display = 'none';
+      document.getElementById('resetAlert').innerHTML = '';
+      document.getElementById('resetSuccess').style.display = 'block';
+    } catch (err) {
+      showAlert(err.message);
+      setLoading(btn, false);
+    }
+  });
+</script>
+</body>
+</html>
